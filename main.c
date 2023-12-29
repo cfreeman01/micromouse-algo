@@ -44,7 +44,7 @@ void printMazeCells(MazeCell* srcMaze);
 void printMazeFlood(unsigned int* srcMazeFlood);
 
 /* Flood fill */
-void floodFill(MazeCell* srcMazeCells, unsigned int startX, unsigned int startY, unsigned int* destFlood);
+void floodFill(MazeCell* srcMazeCells, unsigned int* destFlood);
 void floodFillRecurse(MazeCell* srcMazeCells, unsigned int x, unsigned int y, unsigned int cost, unsigned int* destFlood);
 
 /* Utility */
@@ -58,8 +58,8 @@ int main(void){
         return 1;
 
     getMazeCells(mazeText, mazeFull);
-    
-    floodFill(mazeFull, 7, 7, mazeFlood);
+
+    floodFill(mazeFull, mazeFlood);
     printMazeFlood(mazeFlood);
 
     printf("\nPress any key to exit program.\n");
@@ -147,11 +147,18 @@ void printMazeFlood(unsigned int* srcMazeFlood){
     }
 }
 
-void floodFill(MazeCell* srcMazeCells, unsigned int startX, unsigned int startY, unsigned int* destFlood){
+void floodFill(MazeCell* srcMazeCells, unsigned int* destFlood){
     for(int i = 0; i < MAZE_LENGTH * MAZE_LENGTH; i++)
         destFlood[i] = UINT_MAX;
 
-    floodFillRecurse(srcMazeCells, startX, startY, 0, destFlood);
+    if(MAZE_LENGTH % 2)
+        floodFillRecurse(srcMazeCells, MAZE_LENGTH / 2, MAZE_LENGTH / 2, 0, destFlood);
+    else{
+        floodFillRecurse(srcMazeCells, (MAZE_LENGTH / 2) - 1, (MAZE_LENGTH / 2) - 1, 0, destFlood);
+        floodFillRecurse(srcMazeCells, (MAZE_LENGTH / 2) - 1, MAZE_LENGTH / 2,       0, destFlood);
+        floodFillRecurse(srcMazeCells, MAZE_LENGTH / 2,       (MAZE_LENGTH / 2) - 1, 0, destFlood);
+        floodFillRecurse(srcMazeCells, MAZE_LENGTH / 2,       MAZE_LENGTH / 2,       0, destFlood);
+    }
 }
 
 void floodFillRecurse(MazeCell* srcMazeCells, unsigned int x, unsigned int y, unsigned int cost, unsigned int* destFlood){
