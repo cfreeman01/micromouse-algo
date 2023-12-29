@@ -30,18 +30,27 @@ typedef struct {
 
 /** Global variables **/
 Direction curDirection = NORTH;
-int curX = 0;
-int curY = 0;
 char mazeText[MAZE_LENGTH_TXT][MAZE_LENGTH_TXT + 1];
 MazeCell mazeFull[MAZE_LENGTH * MAZE_LENGTH];
+MazeCell mazeDiscovered[MAZE_LENGTH * MAZE_LENGTH] = {{bFALSE, bFALSE, bFALSE, bFALSE}};
+unsigned int mazeFlood[MAZE_LENGTH * MAZE_LENGTH] = {UINT_MAX};
 
 /** Function declarations **/
-
-/* Maze initialization and display */
+/* Maze reading and display */
 int readMazeTxtFromFile(char* srcFilename, char destMazeTxt[MAZE_LENGTH_TXT][MAZE_LENGTH_TXT + 1]);
 int getMazeCells(char srcMazeTxt[MAZE_LENGTH_TXT][MAZE_LENGTH_TXT + 1], MazeCell* destMaze);
-void printMazeTxt(char srcMazeTxt[MAZE_LENGTH_TXT][MAZE_LENGTH_TXT + 1], int x, int y);
+void printMazeTxt(char srcMazeTxt[MAZE_LENGTH_TXT][MAZE_LENGTH_TXT + 1], unsigned int x, unsigned int y);
 void printMazeCells(MazeCell* srcMaze);
+void printMazeFlood(unsigned int* srcMazeFlood);
+
+/* Flood fill */
+void floodFill(MazeCell* srcMazeCells, unsigned int startX, unsigned int startY, unsigned int* destFlood);
+void floodFillRecurse(MazeCell* srcMazeCells, unsigned int x, unsigned int y, unsigned int cost, unsigned int* destFlood);
+
+/* Utility */
+unsigned int mazeIdx(unsigned int x, unsigned int y);
+unsigned int mirrorY(unsigned int y);
+bool isInRange(unsigned int x, unsigned int y);
 
 /** Main **/
 int main(void){
@@ -50,13 +59,8 @@ int main(void){
 
     getMazeCells(mazeText, mazeFull);
     
-    for(int y = 0; y < MAZE_LENGTH; y++){
-        for(int x = 0; x < MAZE_LENGTH; x++){
-            printMazeTxt(mazeText, x, y);
-            Sleep(250);
-            system("cls");
-        }
-    }
+    floodFill(mazeFull, 7, 7, mazeFlood);
+    printMazeFlood(mazeFlood);
 
     printf("\nPress any key to exit program.\n");
     getch();
@@ -97,13 +101,12 @@ int getMazeCells(char srcMazeTxt[MAZE_LENGTH_TXT][MAZE_LENGTH_TXT + 1], MazeCell
     return 0;
 }
 
-void printMazeTxt(char srcMazeTxt[MAZE_LENGTH_TXT][MAZE_LENGTH_TXT + 1], int x, int y){
+void printMazeTxt(char srcMazeTxt[MAZE_LENGTH_TXT][MAZE_LENGTH_TXT + 1], unsigned int x, unsigned int y){
     int xTxt, yTxt;
 
-    if(x >= 0 && x < MAZE_LENGTH && y >= 0 && y < MAZE_LENGTH){
-        y = (MAZE_LENGTH - 1) - y;
-        xTxt = (2 * x) + 1;
-        yTxt = (2 * y) + 1;
+    if(isInRange(x, y)){
+        xTxt = (2 * x)          + 1;
+        yTxt = (2 * mirrorY(y)) + 1;
     }
     else{
         xTxt = -1;
@@ -134,4 +137,57 @@ void printMazeCells(MazeCell* srcMaze){
             mc.westWall  ? 'W':'0'
         );
     }
+}
+
+void printMazeFlood(unsigned int* srcMazeFlood){
+    for(int i = 0; i < MAZE_LENGTH * MAZE_LENGTH; i++){
+        if(i % MAZE_LENGTH == 0) printf("\n");
+
+        printf("%-11u", srcMazeFlood[i]);
+    }
+}
+
+void floodFill(MazeCell* srcMazeCells, unsigned int startX, unsigned int startY, unsigned int* destFlood){
+    for(int i = 0; i < MAZE_LENGTH * MAZE_LENGTH; i++)
+        destFlood[i] = UINT_MAX;
+
+    floodFillRecurse(srcMazeCells, startX, startY, 0, destFlood);
+}
+
+void floodFillRecurse(MazeCell* srcMazeCells, unsigned int x, unsigned int y, unsigned int cost, unsigned int* destFlood){
+    MazeCell mc = srcMazeCells[mazeIdx(x, y)];
+    destFlood[mazeIdx(x, y)] = cost;
+
+    //north
+    if(isInRange(x, y+1))
+        if(!mc.northWall)
+            if(destFlood[mazeIdx(x, y+1)] > cost+1)
+                floodFillRecurse(srcMazeCells, x, y+1, cost+1, destFlood);
+    //south
+    if(isInRange(x, y-1))
+        if(!mc.southWall)
+            if(destFlood[mazeIdx(x, y-1)] > cost+1)
+                floodFillRecurse(srcMazeCells, x, y-1, cost+1, destFlood);
+    //east
+    if(isInRange(x+1, y))
+        if(!mc.eastWall)
+            if(destFlood[mazeIdx(x+1, y)] > cost+1)
+                floodFillRecurse(srcMazeCells, x+1, y, cost+1, destFlood);
+    //west
+    if(isInRange(x-1, y))
+        if(!mc.westWall)
+            if(destFlood[mazeIdx(x-1, y)] > cost+1)
+                floodFillRecurse(srcMazeCells, x-1, y, cost+1, destFlood);
+}
+
+unsigned int mazeIdx(unsigned int x, unsigned int y){
+    return (mirrorY(y) * MAZE_LENGTH) + x;
+}
+
+unsigned int mirrorY(unsigned int y){
+    return (MAZE_LENGTH - 1) - y;
+}
+
+bool isInRange(unsigned int x, unsigned int y){
+    return x >= 0 && x < MAZE_LENGTH && y >= 0 && y < MAZE_LENGTH;
 }
