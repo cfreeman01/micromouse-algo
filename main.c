@@ -7,19 +7,14 @@
 /** Macro definitions **/
 #define MAZE_LENGTH     16
 #define MAZE_LENGTH_TXT (MAZE_LENGTH * 2) + 1
+#define NORTH 0
+#define SOUTH 1
+#define EAST  2
+#define WEST  3
+#define STACK_SIZE 1000000
 
 /** Type definitions **/
-typedef enum { 
-    bFALSE, 
-    bTRUE 
-} bool;
-
-typedef enum {
-    NORTH,
-    SOUTH,
-    EAST,
-    WEST
-} Direction;
+typedef unsigned char bool;
 
 typedef struct {
     bool northWall;
@@ -29,11 +24,13 @@ typedef struct {
 } MazeCell;
 
 /** Global variables **/
-Direction curDirection = NORTH;
 char mazeText[MAZE_LENGTH_TXT][MAZE_LENGTH_TXT + 1];
 MazeCell mazeFull[MAZE_LENGTH * MAZE_LENGTH];
-MazeCell mazeDiscovered[MAZE_LENGTH * MAZE_LENGTH] = {{bFALSE, bFALSE, bFALSE, bFALSE}};
+MazeCell mazeDiscovered[MAZE_LENGTH * MAZE_LENGTH] = {{FALSE, FALSE, FALSE, FALSE}};
 unsigned int mazeFlood[MAZE_LENGTH * MAZE_LENGTH] = {UINT_MAX};
+bool mazeVisited[MAZE_LENGTH * MAZE_LENGTH] = {FALSE};
+char moveStack[STACK_SIZE];
+unsigned int stackTop = 0;
 
 /** Function declarations **/
 /* Maze reading and display */
@@ -47,20 +44,29 @@ void printMazeFlood(unsigned int* srcMazeFlood);
 void floodFill(MazeCell* srcMazeCells, unsigned int* destFlood);
 void floodFillRecurse(MazeCell* srcMazeCells, unsigned int x, unsigned int y, unsigned int cost, unsigned int* destFlood);
 
+/* Maze traversal */
+void firstTraversal();
+MazeCell detectWalls(unsigned int x, unsigned int y);
+
 /* Utility */
 unsigned int mazeIdx(unsigned int x, unsigned int y);
 unsigned int mirrorY(unsigned int y);
 bool isInRange(unsigned int x, unsigned int y);
+bool isGoal(unsigned int x, unsigned int y);
+bool isExplored(unsigned int x, unsigned int y);
+
+/* Stack */
+char pop(char* stack, unsigned int* top);
+void push(char* stack, unsigned int* top, char data);
 
 /** Main **/
 int main(void){
-    if(readMazeTxtFromFile("mazes/test.txt", mazeText))
+    if(readMazeTxtFromFile("C:/Users/Chris/Documents/code/nai_micromouse_algo/mazes/test.txt", mazeText))
         return 1;
 
     getMazeCells(mazeText, mazeFull);
 
-    floodFill(mazeFull, mazeFlood);
-    printMazeFlood(mazeFlood);
+    firstTraversal();
 
     printf("\nPress any key to exit program.\n");
     getch();
@@ -89,10 +95,10 @@ int getMazeCells(char srcMazeTxt[MAZE_LENGTH_TXT][MAZE_LENGTH_TXT + 1], MazeCell
         for(int j = 0; j < MAZE_LENGTH; j++){
             int mazei = 2 * i;
             int mazej = 2 * j;
-            bool northWall = srcMazeTxt[mazei][mazej + 1]     == ' ' ? bFALSE:bTRUE;
-            bool southWall = srcMazeTxt[mazei + 2][mazej + 1] == ' ' ? bFALSE:bTRUE;
-            bool eastWall  = srcMazeTxt[mazei + 1][mazej + 2] == ' ' ? bFALSE:bTRUE;
-            bool westWall  = srcMazeTxt[mazei + 1][mazej]     == ' ' ? bFALSE:bTRUE;
+            bool northWall = srcMazeTxt[mazei][mazej + 1]     == ' ' ? FALSE:TRUE;
+            bool southWall = srcMazeTxt[mazei + 2][mazej + 1] == ' ' ? FALSE:TRUE;
+            bool eastWall  = srcMazeTxt[mazei + 1][mazej + 2] == ' ' ? FALSE:TRUE;
+            bool westWall  = srcMazeTxt[mazei + 1][mazej]     == ' ' ? FALSE:TRUE;
             MazeCell mazeCell = {northWall, southWall, eastWall, westWall};
             destMaze[(MAZE_LENGTH * i) + j] = mazeCell;
         }
@@ -187,6 +193,107 @@ void floodFillRecurse(MazeCell* srcMazeCells, unsigned int x, unsigned int y, un
                 floodFillRecurse(srcMazeCells, x-1, y, cost+1, destFlood);
 }
 
+void firstTraversal(){
+    unsigned int x = 0, y = 0;
+    
+    while(!isGoal(x, y)){
+        MazeCell thisCell;
+        if(!mazeVisited[mazeIdx(x, y)]){
+            thisCell = mazeDiscovered[mazeIdx(x, y)] = detectWalls(x, y);
+            mazeVisited[mazeIdx(x, y)] = TRUE;
+            floodFill(mazeDiscovered, mazeFlood);
+        }
+        else
+            thisCell = mazeDiscovered[mazeIdx(x, y)];
+
+        unsigned int cost = UINT_MAX;
+        char nextDir;
+        bool foundUnvisitedCell = FALSE;
+
+        //north
+        if(isInRange(x, y+1))
+            if(!thisCell.northWall && !isExplored(x, y+1))
+                if(mazeFlood[mazeIdx(x, y+1)] < cost){
+                   nextDir = NORTH;          
+                   cost = mazeFlood[mazeIdx(x, y+1)];
+                   foundUnvisitedCell = TRUE;
+                }
+
+        //east
+        if(isInRange(x+1, y))
+            if(!thisCell.eastWall && !isExplored(x+1, y))
+                if(mazeFlood[mazeIdx(x+1, y)] < cost){
+                    nextDir = EAST;
+                    cost = mazeFlood[mazeIdx(x+1, y)];
+                    foundUnvisitedCell = TRUE;
+                }
+
+        //south
+        if(isInRange(x, y-1))
+            if(!thisCell.southWall && !isExplored(x, y-1))
+                if(mazeFlood[mazeIdx(x, y-1)] < cost){
+                    nextDir = SOUTH;
+                    cost = mazeFlood[mazeIdx(x, y-1)];
+                    foundUnvisitedCell = TRUE;
+                }
+
+        //west
+        if(isInRange(x-1, y))
+            if(!thisCell.westWall && !isExplored(x-1, y))
+                if(mazeFlood[mazeIdx(x-1, y)] < cost){
+                    nextDir = WEST;
+                    cost = mazeFlood[mazeIdx(x-1, y)];
+                    foundUnvisitedCell = TRUE;
+                }
+
+        if(foundUnvisitedCell){
+            switch(nextDir){
+                case NORTH:
+                    y++;
+                    push(moveStack, &stackTop, NORTH);
+                    break;
+                case SOUTH:
+                    y--;
+                    push(moveStack, &stackTop, SOUTH);
+                    break;
+                case EAST:
+                    x++;
+                    push(moveStack, &stackTop, EAST);
+                    break;
+                case WEST:
+                    x--;
+                    push(moveStack, &stackTop, WEST);
+                    break;
+            }
+        }
+        else{
+            char poppedMove = pop(moveStack, &stackTop);
+            switch(poppedMove){
+                case NORTH:
+                    y--;
+                    break;
+                case SOUTH:
+                    y++;
+                    break;
+                case EAST:
+                    x--;
+                    break;
+                case WEST:
+                    x++;
+                    break;
+            }
+        }
+
+        system("cls");
+        printMazeTxt(mazeText, x, y);
+        Sleep(100);
+    }
+}
+
+MazeCell detectWalls(unsigned int x, unsigned int y){
+    return mazeFull[mazeIdx(x, y)];
+}
+
 unsigned int mazeIdx(unsigned int x, unsigned int y){
     return (mirrorY(y) * MAZE_LENGTH) + x;
 }
@@ -197,4 +304,40 @@ unsigned int mirrorY(unsigned int y){
 
 bool isInRange(unsigned int x, unsigned int y){
     return x >= 0 && x < MAZE_LENGTH && y >= 0 && y < MAZE_LENGTH;
+}
+
+bool isGoal(unsigned int x, unsigned int y){
+    if(MAZE_LENGTH % 2){
+        return (x == MAZE_LENGTH / 2 && y == MAZE_LENGTH / 2);
+    }
+    else{
+        return (
+            ( x == ((MAZE_LENGTH / 2) - 1) || x == (MAZE_LENGTH / 2) ) &&
+            ( y == ((MAZE_LENGTH / 2) - 1) || y == (MAZE_LENGTH / 2) )
+        );
+    }
+}
+
+bool isExplored(unsigned int x, unsigned int y){
+    return mazeVisited[mazeIdx(x, y)];
+}
+
+char pop(char* stack, unsigned int* top){
+    if(*top == 0){
+        printf("ERROR: Popping empty stack!\n");
+        exit(1);
+    }
+
+    (*top)--;
+    return stack[*top];
+}
+
+void push(char* stack, unsigned int* top, char data){
+    if(*top == STACK_SIZE){
+        printf("ERROR: Pushing full stack!\n");
+        exit(1); 
+    }
+
+    stack[*top] = data;
+    (*top)++;
 }
