@@ -6,6 +6,8 @@
 #define TRUE        1
 #define UINT_MAX    65535
 #define STACK_SIZE  1000
+
+#define PRINT_DELAY 100
 #define MAZE_LENGTH_TXT (MAZE_LENGTH * 2) + 1
 
 /* Typedefs */
@@ -22,6 +24,11 @@ typedef enum{
 	EAST,
 	WEST
 } Direction;
+
+typedef struct{
+    unsigned int x;
+    unsigned int y;
+} Point;
 
 typedef struct {
 	bool northWall;
