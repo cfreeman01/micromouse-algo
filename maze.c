@@ -1,8 +1,16 @@
 #include "maze.h"
 #include <stdio.h>
 #include <stdlib.h>
+#if defined(_WIN32)
 #include <conio.h>
 #include <windows.h>
+#define SLEEP_MS(ms) Sleep(ms)
+#define CLEAR_TERMINAL() system("cls")
+#elif defined(__linux__)
+#include <unistd.h>
+#define SLEEP_MS(ms) usleep(ms * 1000)
+#define CLEAR_TERMINAL() system("clear")
+#endif
 
 /* Variables */
 char mazeText[MAZE_LENGTH_TXT][MAZE_LENGTH_TXT + 1];
@@ -87,11 +95,11 @@ int main(void)
 
     while(!searchCell(centerPoints, numCenterPoints));
 
-	Sleep(STATE_DELAY);
+	SLEEP_MS(STATE_DELAY);
 
 	while(!runCell(&startPoint, 1));
 
-	Sleep(STATE_DELAY);
+	SLEEP_MS(STATE_DELAY);
 
 	while(!runCell(centerPoints, numCenterPoints));
 
@@ -178,9 +186,9 @@ void printMazeFlood(unsigned int* srcMazeFlood){
 
 void printAndDelay(void)
 {
-    system("cls");
+    CLEAR_TERMINAL();
     printMazeTxt(mazeText, curPoint);
-    Sleep(PRINT_DELAY);
+    SLEEP_MS(PRINT_DELAY);
 }
 
 bool searchCell(Point goalPoints[], unsigned int numGoalPoints)
