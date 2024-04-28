@@ -94,16 +94,16 @@ int main(void)
     getMazeCells(mazeText, mazeFull);
 
     while(!searchCell(centerPoints, numCenterPoints));
-
+	
 	SLEEP_MS(STATE_DELAY);
-
+	
 	while(!runCell(&startPoint, 1));
-
+	
 	SLEEP_MS(STATE_DELAY);
-
+	
 	while(!runCell(centerPoints, numCenterPoints));
-
-    return 0;
+	
+	return 0;
 }
 
 int readMazeTxtFromFile(char* srcFilename, char destMazeTxt[MAZE_LENGTH_TXT][MAZE_LENGTH_TXT + 1]){
