@@ -12,26 +12,30 @@
 #define MAZE_LENGTH_TXT (MAZE_LENGTH * 2) + 1
 
 /* Typedefs */
-typedef enum{
+typedef enum
+{
 	FIRST_TRAVERSAL,
 	BACK_TO_START,
 	RUN_TO_GOAL,
 	FINISHED
 } MouseState;
 
-typedef enum{
+typedef enum
+{
 	NORTH,
 	SOUTH,
 	EAST,
 	WEST
 } Direction;
 
-typedef struct{
-    unsigned int x;
-    unsigned int y;
+typedef struct
+{
+	unsigned int x;
+	unsigned int y;
 } Point;
 
-typedef struct {
+typedef struct
+{
 	bool northWall;
 	bool southWall;
 	bool eastWall;
