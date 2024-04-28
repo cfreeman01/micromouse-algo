@@ -56,7 +56,7 @@ bool containsPoint(Point pointArr[], unsigned int arrSize, Point point);
 bool isExplored(Point point);
 
 /* Stack */
-char pop (Direction* stack, unsigned int* top);
+char pop(Direction* stack, unsigned int* top);
 void push(Direction* stack, unsigned int* top, char data);
 
 /* Movement */
@@ -80,28 +80,21 @@ bool checkWestWall(void);
 
 int main(void)
 {
-    if(readMazeTxtFromFile("C:/Users/Chris/Documents/code/nai_micromouse_algo/mazes/test.txt", mazeText))
+    if(readMazeTxtFromFile("mazes/test.txt", mazeText))
         return 1;
 
     getMazeCells(mazeText, mazeFull);
 
     while(!searchCell(centerPoints, numCenterPoints));
 
-	printf("\nPress any key to start backtracking.\n");
-    getch();
-    system("cls");
+	Sleep(STATE_DELAY);
 
 	while(!runCell(&startPoint, 1));
 
-	printf("\nPress any key to run to goal.\n");
-    getch();
-    system("cls");
+	Sleep(STATE_DELAY);
 
 	while(!runCell(centerPoints, numCenterPoints));
 
-    printf("\nPress any key to exit program.\n");
-    getch();
-    system("cls");
     return 0;
 }
 

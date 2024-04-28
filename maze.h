@@ -5,9 +5,10 @@
 #define FALSE       0
 #define TRUE        1
 #define UINT_MAX    65535
-#define STACK_SIZE  1000
+#define STACK_SIZE  10000
 
 #define PRINT_DELAY 100
+#define STATE_DELAY 3000
 #define MAZE_LENGTH_TXT (MAZE_LENGTH * 2) + 1
 
 /* Typedefs */
@@ -36,6 +37,3 @@ typedef struct {
 	bool eastWall;
 	bool westWall;
 } MazeCell;
-
-/* Exported functions */
-void traverseCell(void);
