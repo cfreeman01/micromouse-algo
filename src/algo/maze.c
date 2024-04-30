@@ -184,12 +184,12 @@ bool firstTraversalItr(void)
 
 bool backtrackItr(void)
 {
-	runCell(&startPoint, 1);
+	return runCell(&startPoint, 1);
 }
 
 bool runToGoalItr(void)
 {
-	runCell(centerPoints, numCenterPoints);
+	return runCell(centerPoints, numCenterPoints);
 }
 
 Direction getCurDir(void)
@@ -403,7 +403,8 @@ MazeCell checkWalls()
 
 bool checkNorthWall(void)
 {
-	switch(curDir){
+	switch(curDir)
+	{
 		case NORTH:
 			return checkFrontWall();
 		case SOUTH:
@@ -417,7 +418,8 @@ bool checkNorthWall(void)
 
 bool checkSouthWall(void)
 {
-	switch(curDir){
+	switch(curDir)
+	{
 		case NORTH:
 			return checkBackWall();
 		case SOUTH:
@@ -431,7 +433,8 @@ bool checkSouthWall(void)
 
 bool checkEastWall(void)
 {
-	switch(curDir){
+	switch(curDir)
+	{
 		case NORTH:
 			return checkRightWall();
 		case SOUTH:
@@ -445,7 +448,8 @@ bool checkEastWall(void)
 
 bool checkWestWall(void)
 {
-	switch(curDir){
+	switch(curDir)
+	{
 		case NORTH:
 			return checkLeftWall();
 		case SOUTH:
