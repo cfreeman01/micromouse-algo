@@ -15,6 +15,7 @@ unsigned int stackTop       = 0;
 Direction    curDir         = NORTH;
 Point        curPoint       = {0, 0};
 Point        startPoint     = {0, 0};
+Point        lastPoint;
 Point        centerPoints[] =
 #if MAZE_LENGTH % 2
 {
@@ -97,8 +98,7 @@ bool searchCell(Point goalPoints[], unsigned int numGoalPoints)
 	}
 	else
 	{
-		Direction poppedMove = pop(moveStack, &stackTop);
-		moveBackward(poppedMove);
+		moveBackward(pop(moveStack, &stackTop));
 	}
 
 	if (containsPoint(goalPoints, numGoalPoints, curPoint))
@@ -177,6 +177,16 @@ void beginRunToGoal(void)
 	floodFill(mazeDiscovered, mazeFlood, centerPoints, numCenterPoints, FALSE);
 }
 
+void beginGoToLastPoint(void)
+{
+	floodFill(mazeDiscovered, mazeFlood, &lastPoint, 1, FALSE);
+}
+
+void resumeFirstTraversal(void)
+{
+	floodFill(mazeDiscovered, mazeFlood, centerPoints, numCenterPoints, TRUE);
+}
+
 bool firstTraversalItr(void)
 {
 	return searchCell(centerPoints, numCenterPoints);
@@ -190,6 +200,11 @@ bool backtrackItr(void)
 bool runToGoalItr(void)
 {
 	return runCell(centerPoints, numCenterPoints);
+}
+
+bool goToLastPointItr(void)
+{
+	return runCell(&lastPoint, 1);
 }
 
 Direction getCurDir(void)
@@ -231,7 +246,42 @@ bool isExplored(Point point)
 	return mazeVisited[mazeIdx(point)];
 }
 
-void resetMouse()
+void resetMouse1(void)
+{
+	MazeCell empty = {FALSE, FALSE, FALSE, FALSE};
+
+	for(int i = 0; i < NUM_BAD_POINTS; i++)
+	{
+		if(stackTop == 0)
+			break;
+
+		mazeVisited[mazeIdx(curPoint)] = FALSE;
+		mazeFlood[mazeIdx(curPoint)] = COST_MAX;
+		mazeDiscovered[mazeIdx(curPoint)] = empty;
+		
+		switch (pop(moveStack, &stackTop))
+		{
+			case NORTH:
+				curPoint.y--;
+				break;
+			case SOUTH:
+				curPoint.y++;
+				break;
+			case EAST:
+				curPoint.x--;
+				break;
+			case WEST:
+				curPoint.x++;
+				break;
+		}
+	}
+
+	lastPoint = curPoint;
+	curPoint.x = curPoint.y = 0;
+	curDir = NORTH;
+}
+
+void resetMouse2(void)
 {
 	curPoint.x = curPoint.y = 0;
 	curDir = NORTH;

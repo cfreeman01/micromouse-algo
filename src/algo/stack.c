@@ -1,6 +1,6 @@
 #include "stack.h"
 
-char pop(Direction *stack, unsigned int *top)
+Direction pop(Direction *stack, unsigned int *top)
 {
 	if (*top == 0)
 	{

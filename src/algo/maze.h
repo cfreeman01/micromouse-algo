@@ -2,11 +2,12 @@
 
 #include <stdbool.h>
 
-#define MAZE_LENGTH 16
-#define FALSE       0
-#define TRUE        1
-#define COST_MAX   65535
-#define STACK_SIZE  1000
+#define MAZE_LENGTH    16
+#define FALSE          0
+#define TRUE           1
+#define COST_MAX       65535
+#define STACK_SIZE     1000
+#define NUM_BAD_POINTS 5
 
 /* Typedefs */
 typedef enum
@@ -36,9 +37,12 @@ bool searchCell(Point goalPoints[], unsigned int numGoalPoints);
 bool runCell(Point goalPoints[], unsigned int numGoalPoints);
 void beginBacktrack(void);
 void beginRunToGoal(void);
+void beginGoToLastPoint(void);
+void resumeFirstTraversal(void);
 bool firstTraversalItr(void);
 bool backtrackItr(void);
 bool runToGoalItr(void);
+bool goToLastPointItr(void);
 
 /* Utilities */
 Direction getCurDir(void);
@@ -48,7 +52,8 @@ unsigned int mirrorY(unsigned int y);
 bool isInRange(Point point);
 bool containsPoint(Point pointArr[], unsigned int arrSize, Point point);
 bool isExplored(Point point);
-void resetMouse(void);
+void resetMouse1(void);
+void resetMouse2(void);
 
 /* Movement */
 void move(Direction direction);

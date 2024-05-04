@@ -28,17 +28,17 @@ MouseState (*stateFuncs[])(void) = {
 StateTransition stateTransitions[] = {
 	{FIRST_TRAVERSAL,  FIRST_TRAVERSAL,  NULL},
 	{FIRST_TRAVERSAL,  BACK_TO_START,    beginBacktrack},
-	{FIRST_TRAVERSAL,  RESET_1,          resetMouse},	
+	{FIRST_TRAVERSAL,  RESET_1,          resetMouse1},	
 	{BACK_TO_START,    BACK_TO_START,    NULL},
 	{BACK_TO_START,    RUN_TO_GOAL,      beginRunToGoal},
-	{BACK_TO_START,    RESET_2,          resetMouse},
+	{BACK_TO_START,    RESET_2,          resetMouse2},
 	{RUN_TO_GOAL,      RUN_TO_GOAL,      NULL},
 	{RUN_TO_GOAL,      FINISHED,         NULL},
-	{RUN_TO_GOAL,      RESET_2,          resetMouse},
-	{RESET_1,          GO_TO_LAST_POINT, NULL},
+	{RUN_TO_GOAL,      RESET_2,          resetMouse2},
+	{RESET_1,          GO_TO_LAST_POINT, beginGoToLastPoint},
 	{RESET_1,          RESET_1,          NULL},
 	{GO_TO_LAST_POINT, GO_TO_LAST_POINT, NULL},
-	{GO_TO_LAST_POINT, FIRST_TRAVERSAL,  NULL},
+	{GO_TO_LAST_POINT, FIRST_TRAVERSAL,  resumeFirstTraversal},
 	{RESET_2,          RESET_2,          NULL},
 	{RESET_2,          RUN_TO_GOAL,      beginRunToGoal},
 	{FINISHED,         FINISHED,         NULL}
@@ -115,6 +115,9 @@ MouseState reset2(void)
 
 MouseState goToLastPoint(void)
 {
+	if(goToLastPointItr())
+		return FIRST_TRAVERSAL;
+
 	return GO_TO_LAST_POINT;
 }
 
