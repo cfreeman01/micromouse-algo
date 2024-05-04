@@ -1,15 +1,11 @@
 #pragma once
 #include <stdbool.h>
+#include <stdint.h>
 
-#if defined(_WIN32)
-#include <conio.h>
-#include <windows.h>
-#define SLEEP_MS(ms) Sleep(ms)
-#define CLEAR_TERMINAL() system("cls")
-#elif defined(__linux__)
-#include <unistd.h>
-#define SLEEP_MS(ms) usleep(ms * 1000)
-#define CLEAR_TERMINAL() system("clear")
-#endif
+extern bool keysPressed[256];
 
-bool isKeyPressed(char c);
+void sleepMs(uint32_t ms);
+void clearTerminal();
+
+bool isKeyPressed(unsigned char c);
+void getKeyPressed();

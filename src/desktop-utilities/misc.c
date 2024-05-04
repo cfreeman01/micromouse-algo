@@ -1,19 +1,10 @@
 #include "misc.h"
 
-#if defined(_WIN32)
+bool keysPressed[256] = {0};
 
-#include <conio.h>
-
-bool isKeyPressed(char c)
+bool isKeyPressed(unsigned char c)
 {
-    return (kbhit() && getch() == c);
+    bool ret = keysPressed[c];
+    keysPressed[c] = 0;
+    return ret;
 }
-
-#elif defined(__linux__)
-
-bool isKeyPressed(char c)
-{
-    return 0;
-}
-
-#endif

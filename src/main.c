@@ -12,15 +12,20 @@ int main(void)
 
 	getMazeCells(mazeText, mazeFull);
 
-    while(!isKeyPressed(ESC))
+    while(1)
     {
+        getKeyPressed();
+
+        if(isKeyPressed(ESC))
+            break;
+
         algoIterate();
 
-        CLEAR_TERMINAL();
+        clearTerminal();
 
         printMazeTxt(mazeText, getCurPoint());
 
-        SLEEP_MS(75);
+        sleepMs(75);
     }
 
     return 0;
