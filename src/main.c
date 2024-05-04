@@ -7,10 +7,8 @@
 
 int main(void)
 {
-    if (readMazeTxtFromFile("mazes/test.txt", mazeText))
-		return 1;
-
-	getMazeCells(mazeText, mazeFull);
+    if(init())
+        return 1;
 
     while(1)
     {
@@ -27,6 +25,8 @@ int main(void)
 
         sleepMs(75);
     }
+
+    end();
 
     return 0;
 }

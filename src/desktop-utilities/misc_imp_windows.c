@@ -2,6 +2,17 @@
 #include "misc.h"
 #include <conio.h>
 #include <windows.h>
+#include "mazeReadAndDisplay.h"
+
+int init()
+{
+    return mazeInit();
+}
+
+void end()
+{
+
+}
 
 void sleepMs(uint32_t ms)
 {

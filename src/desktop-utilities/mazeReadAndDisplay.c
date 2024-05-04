@@ -5,6 +5,14 @@
 char mazeText[MAZE_LENGTH_TXT][MAZE_LENGTH_TXT + 1];
 MazeCell mazeFull[MAZE_LENGTH * MAZE_LENGTH];
 
+int mazeInit()
+{
+	if (readMazeTxtFromFile("mazes/test.txt", mazeText))
+		return 1;
+
+	getMazeCells(mazeText, mazeFull);
+}
+
 int readMazeTxtFromFile(char *srcFilename, char destMazeTxt[MAZE_LENGTH_TXT][MAZE_LENGTH_TXT + 1])
 {
 	FILE *file = fopen(srcFilename, "r");
